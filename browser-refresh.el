@@ -145,7 +145,7 @@
 ;;;###autoload
 (defun browser-refresh ()
   (interactive)
-  (when browser-refresh-save-buffer
+  (when (and browser-refresh-save-buffer (buffer-modified-p))
     (save-buffer))
   (let ((refresher (browser-refresh--make-refresher)))
     (chrome refresher)))
