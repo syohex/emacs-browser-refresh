@@ -62,6 +62,9 @@
 (defclass browser-refresh-mac (browser-refresh-base)
   ())
 
+(defsubst browser-refresh--activate-string (activate-p)
+  (if activate-p "activate" ""))
+
 (defun browser-refresh--chrome-applescript (app activate-p)
   (do-applescript
    (format
@@ -72,7 +75,7 @@
     set winref's index to 1
     reload active tab of winref
   end tell
-" app (if activate-p "activate" ""))) )
+" app (browser-refresh--activate-string activate-p))) )
 
 (defmethod chrome ((refresher browser-refresh-mac))
   (browser-refresh--chrome-applescript "Google Chrome" (oref refresher :activate)))
@@ -85,7 +88,7 @@
     %s
     tell application \"System Events\" to keystroke \"r\" using command down
   end tell
-" "activate")))
+" (browser-refresh--activate-string (oref refresher :activate)))))
 
 (defmethod safari ((refresher browser-refresh-mac))
   (do-applescript
@@ -97,7 +100,7 @@
     set its URL to (get its URL)
     end tell
   end tell
-" "activate")))
+" (browser-refresh--activate-string (oref refresher :activate)))))
 
 ;;
 ;; GNU/Linux
