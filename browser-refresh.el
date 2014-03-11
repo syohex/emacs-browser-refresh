@@ -148,7 +148,7 @@
   (when (and browser-refresh-save-buffer (buffer-modified-p))
     (save-buffer))
   (let ((refresher (browser-refresh--make-refresher)))
-    (chrome refresher)))
+    (funcall browser-refresh-default-browser refresher)))
 
 (provide 'browser-refresh)
 
