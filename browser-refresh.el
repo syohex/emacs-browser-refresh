@@ -43,6 +43,11 @@
   :type 'symbol
   :group 'browser-refresh)
 
+(defcustom browser-refresh-save-buffer t
+  "Non-nil means saving buffer before browser refresh"
+  :type 'boolean
+  :group 'browser-refresh)
+
 ;;
 ;; MacOSX
 ;;
@@ -140,6 +145,8 @@
 ;;;###autoload
 (defun browser-refresh ()
   (interactive)
+  (when browser-refresh-save-buffer
+    (save-buffer))
   (let ((refresher (browser-refresh--make-refresher)))
     (chrome refresher)))
 
