@@ -83,9 +83,7 @@
     "
   tell application \"Firefox\"
     %s
-    set winref to a reference to (first window whose title does not start with \"Developer Tools - \")
-    set winref's index to 1
-    reload active tab of winref
+    tell application \"System Events\" to keystroke \"r\" using command down
   end tell
 " "activate")))
 
