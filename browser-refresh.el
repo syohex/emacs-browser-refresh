@@ -33,7 +33,7 @@
   ""
   :group 'external)
 
-(defcustom browser-refresh-activate nil
+(defcustom browser-refresh-activate t
   "Activate browser after refresh"
   :type 'boolean
   :group 'browser-refresh)
@@ -49,10 +49,17 @@
   :group 'browser-refresh)
 
 ;;
+;; Base class
+;;
+
+(defclass browser-refresh-base ()
+  ((activate :initarg :activate)))
+
+;;
 ;; MacOSX
 ;;
 
-(defclass browser-refresh-mac ()
+(defclass browser-refresh-mac (browser-refresh-base)
   ())
 
 (defun browser-refresh--chrome-applescript (app activate-p)
@@ -65,10 +72,10 @@
     set winref's index to 1
     reload active tab of winref
   end tell
-")) app (if activate-p "activate" ""))
+" app (if activate-p "activate" ""))) )
 
 (defmethod chrome ((refresher browser-refresh-mac))
-  (browser-refresh--chrome-applescript "Google Chrome"))
+  (browser-refresh--chrome-applescript "Google Chrome" (oref refresher :activate)))
 
 (defmethod firefox ((refresher browser-refresh-mac))
   (do-applescript
@@ -80,7 +87,7 @@
     set winref's index to 1
     reload active tab of winref
   end tell
-") ""))
+" "activate")))
 
 (defmethod safari ((refresher browser-refresh-mac))
   (do-applescript
@@ -92,14 +99,13 @@
     set its URL to (get its URL)
     end tell
   end tell
-")
-) "")
+" "activate")))
 
 ;;
 ;; GNU/Linux
 ;;
 
-(defclass browser-refresh-linux ()
+(defclass browser-refresh-linux (browser-refresh-base)
   ())
 
 (defconst browser-refresh--xdotool-base-option
@@ -108,13 +114,11 @@
 (defun browser-refresh--send-key-with-xdotool (window-ids key &optional activate)
   (dolist (window-id window-ids)
     (let ((cmd (concat "xdotool key --window " window-id " " key)))
-      (when activate
-        (add-to-list 'options "windowactivate" t))
       (unless (zerop (call-process-shell-command cmd))
         (error "Failed: %s" cmd)))))
 
 (defun browser-refresh--linux-search-window-id (class)
-  (let ((cmd (concat "xdotool search --onlyvisible --class " class)))
+  (let ((cmd (concat "xdotool search --class " class)))
     (with-temp-buffer
       (unless (zerop (call-process-shell-command cmd nil t))
         (error "Failed: %s" cmd))
@@ -129,18 +133,28 @@
                  (forward-line 1))
                finally return window-ids))))
 
+(defmethod activate ((refresher browser-refresh-linux) window-id)
+  (when (oref refresher :activate)
+    (let ((cmd (concat "xdotool windowactivate " window-id)))
+      (unless (zerop (call-process-shell-command cmd))
+        (error "Failed: %s" cmd)))))
+
 (defmethod chrome ((refresher browser-refresh-linux))
   (let ((window-ids (browser-refresh--linux-search-window-id "Google-Chrome")))
-    (browser-refresh--send-key-with-xdotool window-ids "F5")))
+    (browser-refresh--send-key-with-xdotool window-ids "F5")
+    (activate refresher (car window-ids))))
 
 (defmethod firefox ((refresher browser-refresh-linux))
   (let ((window-ids (browser-refresh--linux-search-window-id "Firefox")))
-    (browser-refresh--send-key-with-xdotool window-ids "F5")))
+    (browser-refresh--send-key-with-xdotool window-ids "F5")
+    (activate refresher (car window-ids))))
 
 (defun browser-refresh--make-refresher ()
-  (cl-case system-type
-    (gnu/linux (make-instance 'browser-refresh-linux))
-    (otherwise (error "%s is not supported yet" system-type))))
+  (let ((class (cl-case system-type
+                 (gnu/linux 'browser-refresh-linux)
+                 (darwin 'browser-refresh-mac)
+                 (otherwise (error "%s is not supported yet" system-type)))))
+    (make-instance class :activate browser-refresh-activate)))
 
 ;;;###autoload
 (defun browser-refresh ()
