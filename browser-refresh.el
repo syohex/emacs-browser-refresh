@@ -30,7 +30,7 @@
 (declare-function do-applescript "nsfns.m")
 
 (defgroup browser-refresh nil
-  ""
+  "Browser refresh utility for multi browsers and multi platform"
   :group 'external)
 
 (defcustom browser-refresh-activate t

@@ -14,3 +14,18 @@ I will support MacOSX.
 
 - Google Chrome(Linux)
 - Firefox(Linux)
+
+
+## Customization
+
+#### `browser-refresh-activate`(Default `t`)
+
+Move focus to browser after refresh.
+
+#### `browser-refresh-default-browser`(Default `'chrome`)
+
+Default browser.
+
+#### `browser-refresh-save-buffer`(Default `t`)
+
+Non-nil means saving buffer before browser refresh.
