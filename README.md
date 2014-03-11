@@ -5,15 +5,15 @@ Browser refresh utility. This is inspired by [BrowserRefresh](https://github.com
 
 ## Support Platform
 
+- MacOSX
 - GNU Linux( `xdotool` is required)
-
-I will support MacOSX.
 
 
 ## Support Browser
 
-- Google Chrome(Linux)
-- Firefox(Linux)
+- Google Chrome(MacOSX, Linux)
+- Firefox(MacOSX, Linux)
+- Safari(MacOSX)
 
 
 ## Customization
