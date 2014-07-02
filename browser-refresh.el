@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
-;; URL:
+;; URL: https://github.com/syohex/emacs-browser-refresh
 ;; Version: 0.01
 ;; Package-Requires: ((eieio "1.3") (cl-lib "0.5"))
 
