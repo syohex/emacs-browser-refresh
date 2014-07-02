@@ -112,33 +112,30 @@
 (defconst browser-refresh--xdotool-base-option
   '("search" "--sync" "--onlyvisible"))
 
-(defun browser-refresh--send-key-with-xdotool (window-ids key &optional activate)
+(defun browser-refresh--send-key-with-xdotool (window-ids key)
   (dolist (window-id window-ids)
-    (let ((cmd (concat "xdotool key --window " window-id " " key)))
-      (unless (zerop (call-process-shell-command cmd))
-        (error "Failed: %s" cmd)))))
+    (unless (zerop (call-process "xdotool" nil nil nil "key" "--window" window-id key))
+      (error "Failed: 'xdotool key --window %s %s'" window-id key))))
 
 (defun browser-refresh--linux-search-window-id (class)
-  (let ((cmd (concat "xdotool search --class " class)))
-    (with-temp-buffer
-      (unless (zerop (call-process-shell-command cmd nil t))
-        (error "Failed: %s" cmd))
-      (goto-char (point-min))
-      (cl-loop with window-ids = nil
-               until (eobp)
-               do
-               (progn
-                 (push (buffer-substring-no-properties
-                        (line-beginning-position) (line-end-position))
-                       window-ids)
-                 (forward-line 1))
-               finally return window-ids))))
+  (with-temp-buffer
+    (unless (zerop (call-process "xdotool" nil t nil "search" "--class" class))
+      (error "Failed: 'xdotool search --class %s'" class))
+    (goto-char (point-min))
+    (cl-loop with window-ids = nil
+             until (eobp)
+             do
+             (progn
+               (push (buffer-substring-no-properties
+                      (line-beginning-position) (line-end-position))
+                     window-ids)
+               (forward-line 1))
+             finally return window-ids)))
 
 (defmethod activate ((refresher browser-refresh-linux) window-id)
   (when (oref refresher :activate)
-    (let ((cmd (concat "xdotool windowactivate " window-id)))
-      (unless (zerop (call-process-shell-command cmd))
-        (error "Failed: %s" cmd)))))
+    (unless (zerop (call-process "xdotool" nil nil nil "windowactivate" window-id))
+      (error "Failed: 'xdotool windowactivate %s'" window-id))))
 
 (defmethod chrome ((refresher browser-refresh-linux))
   (let ((window-ids (browser-refresh--linux-search-window-id "Google-Chrome")))
